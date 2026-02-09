@@ -2,8 +2,8 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
-//const API_BASE_URL = 'http://localhost:3000';
-const API_BASE_URL = 'http://103.255.190.241:3000';
+const API_BASE_URL = 'http://localhost:3000';
+//const API_BASE_URL = 'http://103.255.190.241:3000';
 
 export interface VisitorMaster {
   RID: number;

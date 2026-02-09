@@ -20,6 +20,8 @@ interface Environment {
   PORT: string;
   EMAIL_USER: string;
   EMAIL_PASSWORD: string;
+  EMAIL_HOST: string;
+  EMAIL_PORT: number;
   DATABASE_CONFIG: DatabaseConfig;
 }
 const DB_CONFIG: Environment = {
@@ -27,8 +29,10 @@ const DB_CONFIG: Environment = {
   TOKEN_EXPIRATION: '',
   SECRET_KEY: '',
   PORT: '',
-  EMAIL_USER: '',
-  EMAIL_PASSWORD: '',
+  EMAIL_USER: process.env.EMAIL_USER || '',
+  EMAIL_PASSWORD: process.env.EMAIL_PASSWORD || '',
+  EMAIL_HOST: process.env.EMAIL_HOST || 'smtp.office365.com',
+  EMAIL_PORT: parseInt(process.env.EMAIL_PORT || '587', 10),
   DATABASE_CONFIG: {},
 };
 const DATA_BASE = process.env.PLATFORM || 'Development';

@@ -1,0 +1,171 @@
+<div class="mail-log-container">
+  <div class="header">
+    <h1 class="title">Email Log</h1>
+    <p class="subtitle">View history of all sent emails</p>
+  </div>
+
+  <!-- Filter Bar -->
+  <div class="filter-bar">
+    <div class="filter-group">
+      <label class="filter-label" for="expoFilter">Filter by Expo</label>
+      <select id="expoFilter" class="filter-select" [(ngModel)]="selectedExpoId" (ngModelChange)="onFilterChange()">
+        <option [ngValue]="null">All Expos</option>
+        @for (expo of expos; track expo.RID) {
+        <option [ngValue]="expo.RID">{{ expo.ExpoName }}</option>
+        }
+      </select>
+    </div>
+    <div class="filter-group">
+      <label class="filter-label" for="statusFilter">Filter by Status</label>
+      <select id="statusFilter" class="filter-select" [(ngModel)]="selectedStatus" (ngModelChange)="onFilterChange()">
+        <option [ngValue]="null">All Status</option>
+        <option value="Sent">Sent</option>
+        <option value="Failed">Failed</option>
+        <option value="Pending">Pending</option>
+      </select>
+    </div>
+    <div class="filter-actions">
+      <span class="filter-count">{{ mailLogs.length }} of {{ allMailLogs.length }} email(s)</span>
+    </div>
+  </div>
+
+  <div class="content-card">
+    <!-- Loading State -->
+    @if (isLoading) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Loading email logs...</p>
+    </div>
+    }
+
+    <!-- Error State -->
+    @if (errorMessage && !isLoading) {
+    <div class="error-state">
+      <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="8" x2="12" y2="12"></line>
+        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+      </svg>
+      <p>{{ errorMessage }}</p>
+      <button class="btn-retry" (click)="loadMailLogs()">Try Again</button>
+    </div>
+    }
+
+    <!-- Empty State -->
+    @if (!isLoading && !errorMessage && mailLogs.length === 0) {
+    <div class="empty-state">
+      <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="1.5">
+        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+        <polyline points="22,6 12,13 2,6"></polyline>
+      </svg>
+      <h3>No Emails Found</h3>
+      <p>Email logs will appear here after visitors register</p>
+    </div>
+    }
+
+    <!-- Data Table -->
+    @if (!isLoading && !errorMessage && mailLogs.length > 0) {
+    <div class="table-container">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Recipient</th>
+            <th>Subject</th>
+            <th>Expo</th>
+            <th>Status</th>
+            <th>Sent Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (log of mailLogs; track log.RID) {
+          <tr>
+            <td class="cell-email">{{ log.RecipientEmail }}</td>
+            <td class="cell-subject">{{ truncateSubject(log.Subject) }}</td>
+            <td class="cell-expo">{{ getExpoName(log.ExpoID) }}</td>
+            <td>
+              <span class="status-badge" [ngClass]="getStatusClass(log.Status)">
+                {{ log.Status }}
+              </span>
+            </td>
+            <td class="cell-date">{{ formatDate(log.SentDate || log.CreatedDate) }}</td>
+            <td class="cell-actions">
+              <button class="btn-action btn-view" (click)="viewLog(log)" title="View Details">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+                View
+              </button>
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="table-footer">
+      <p class="record-count">Showing {{ mailLogs.length }} of {{ allMailLogs.length }} email(s)</p>
+    </div>
+    }
+  </div>
+</div>
+
+<!-- View Mail Log Modal -->
+@if (showModal && selectedLog) {
+<div class="modal-overlay" (click)="closeModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Email Details</h2>
+      <button class="modal-close" (click)="closeModal()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <div class="modal-details-grid">
+        <div class="detail-item">
+          <span class="detail-label">Recipient</span>
+          <span class="detail-value">{{ selectedLog.RecipientEmail }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Subject</span>
+          <span class="detail-value">{{ selectedLog.Subject }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Status</span>
+          <span class="status-badge" [ngClass]="getStatusClass(selectedLog.Status)">
+            {{ selectedLog.Status }}
+          </span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Sent Date</span>
+          <span class="detail-value">{{ formatDate(selectedLog.SentDate) }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Created Date</span>
+          <span class="detail-value">{{ formatDate(selectedLog.CreatedDate) }}</span>
+        </div>
+        @if (selectedLog.ErrorMessage) {
+        <div class="detail-item detail-full">
+          <span class="detail-label error-label">Error Message</span>
+          <span class="detail-value error-value">{{ selectedLog.ErrorMessage }}</span>
+        </div>
+        }
+      </div>
+
+      <div class="email-preview">
+        <h4>Email Content</h4>
+        <div class="email-body" [innerHTML]="selectedLog.Body"></div>
+      </div>
+    </div>
+  </div>
+</div>
+}

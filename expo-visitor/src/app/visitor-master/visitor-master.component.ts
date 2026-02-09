@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { VisitorMasterService, CreateVisitorMasterDto } from '../services/visitor-master.service';
 import { ExpoMasterService, ExpoMaster } from '../services/expo-master.service';
+import { MailService, SendVisitorConfirmationDto } from '../services/mail.service';
 
 interface VisitorForm {
   expoId: number | null;
@@ -79,6 +80,7 @@ export class VisitorMasterComponent implements OnInit {
   constructor(
     private visitorMasterService: VisitorMasterService,
     private expoMasterService: ExpoMasterService,
+    private mailService: MailService,
     private ngZone: NgZone
   ) {
     this.initSpeechRecognition();
@@ -282,8 +284,28 @@ export class VisitorMasterComponent implements OnInit {
     };
 
     this.visitorMasterService.add(payload, this.profileImage || undefined).subscribe({
-      next: () => {
+      next: (response) => {
         this.registeredVisitorName = payload.FullName;
+
+        // Send confirmation email
+        const emailPayload: SendVisitorConfirmationDto = {
+          VisitorID: response.data.RID,
+          ExpoID: payload.ExpoID,
+          RecipientEmail: payload.EmailAddress,
+          VisitorName: payload.FullName,
+          ExpoName: this.selectedExpo?.ExpoName,
+        };
+
+        this.mailService.sendVisitorConfirmation(emailPayload).subscribe({
+          next: (mailResponse) => {
+            console.log('Confirmation email sent:', mailResponse.data.Status);
+          },
+          error: (mailError) => {
+            console.error('Failed to send confirmation email:', mailError);
+            // Don't show error to user - registration was successful
+          },
+        });
+
         this.isSubmitting = false;
         this.resetForm();
         this.showThankYou = true;

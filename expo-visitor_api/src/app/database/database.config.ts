@@ -2,12 +2,14 @@ import {
   ExpoMasterTable,
   VisitorMasterTable,
   DocumentMasterTable,
+  MailLogTable,
 } from './tables';
 
 export const TABLE_MAIN = [
   ExpoMasterTable,
   VisitorMasterTable,
   DocumentMasterTable,
+  MailLogTable,
 ];
 
 export const SEQUELIZE_CONFIG = {
