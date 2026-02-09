@@ -1,0 +1,350 @@
+<div class="visitor-container">
+  <!-- Expo Header Banner -->
+  @if (selectedExpo) {
+  <div class="expo-banner">
+    <div class="expo-info">
+      <h2 class="expo-name">{{ selectedExpo.ExpoName }}</h2>
+      <div class="expo-meta">
+        <span class="expo-date">{{ formatDate(selectedExpo.StartDate) }} -
+          {{ formatDate(selectedExpo.EndDate) }}</span>
+      </div>
+    </div>
+  </div>
+  }
+
+  <div class="form-wrapper">
+    <div class="form-header">
+      <h1 class="form-title">Visitor Registration</h1>
+      <p class="form-subtitle">
+        Please fill in your details to register for the event
+      </p>
+    </div>
+
+    <!-- Success/Error Messages -->
+    @if (successMessage) {
+    <div class="alert alert-success">{{ successMessage }}</div>
+    }
+    @if (errorMessage) {
+    <div class="alert alert-error">{{ errorMessage }}</div>
+    }
+
+    <form (ngSubmit)="onSubmit()" class="registration-form">
+      <!-- Expo Selection -->
+      @if (expos.length > 1) {
+      <div class="form-section">
+        <div class="form-group full-width">
+          <label for="expo" class="form-label">Select Expo <span class="required">*</span></label>
+          <select id="expo" name="expo" class="form-select" [(ngModel)]="form.expoId" (ngModelChange)="onExpoChange()"
+            required>
+            @for (expo of expos; track expo.RID) {
+            <option [ngValue]="expo.RID">{{ expo.ExpoName }}</option>
+            }
+          </select>
+        </div>
+      </div>
+      }
+
+      <!-- Profile Picture Section -->
+      <div class="profile-section">
+        <div class="profile-upload">
+          <div class="profile-preview" [class.has-image]="profileImagePreview">
+            @if (profileImagePreview) {
+            <img [src]="profileImagePreview" alt="Profile Preview" />
+            <button type="button" class="remove-image" (click)="removeImage()">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+            } @else {
+            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="1.5">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+            }
+          </div>
+          <div class="profile-info">
+            <h3>Profile Picture</h3>
+            <p>Upload a clear photo of yourself (JPG, PNG - Max 5MB)</p>
+            <label class="btn-upload">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+              </svg>
+              Choose Photo
+              <input type="file" accept="image/*" (change)="onImageSelect($event)" hidden />
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Form Fields -->
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="firstName" class="form-label">First Name <span class="required">*</span></label>
+          <div class="input-with-voice">
+            <input type="text" id="firstName" name="firstName" class="form-input" [(ngModel)]="form.firstName"
+              placeholder="Enter first name" required />
+            <button type="button" class="btn-voice" [class.active]="activeVoiceField === 'firstName'"
+              (click)="startVoice('firstName')" title="Voice input">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2">
+                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                <line x1="12" y1="19" x2="12" y2="23"></line>
+                <line x1="8" y1="23" x2="16" y2="23"></line>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="lastName" class="form-label">Last Name</label>
+          <div class="input-with-voice">
+            <input type="text" id="lastName" name="lastName" class="form-input" [(ngModel)]="form.lastName"
+              placeholder="Enter last name" />
+            <button type="button" class="btn-voice" [class.active]="activeVoiceField === 'lastName'"
+              (click)="startVoice('lastName')" title="Voice input">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2">
+                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                <line x1="12" y1="19" x2="12" y2="23"></line>
+                <line x1="8" y1="23" x2="16" y2="23"></line>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="email" class="form-label">Email Address <span class="required">*</span></label>
+          <input type="email" id="email" name="email" class="form-input" [(ngModel)]="form.email"
+            placeholder="your.email@example.com" required />
+        </div>
+
+        <div class="form-group">
+          <label for="phone" class="form-label">Phone Number <span class="required">*</span></label>
+          <div class="input-with-voice">
+            <input type="tel" id="phone" name="phone" class="form-input" [(ngModel)]="form.phone"
+              placeholder="+91 98765 43210" required />
+            <button type="button" class="btn-voice" [class.active]="activeVoiceField === 'phone'"
+              (click)="startVoice('phone')" title="Voice input">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2">
+                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                <line x1="12" y1="19" x2="12" y2="23"></line>
+                <line x1="8" y1="23" x2="16" y2="23"></line>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="company" class="form-label">Company/Organization <span class="required">*</span></label>
+          <div class="input-with-voice">
+            <input type="text" id="company" name="company" class="form-input" [(ngModel)]="form.company"
+              placeholder="Enter company name" required />
+            <button type="button" class="btn-voice" [class.active]="activeVoiceField === 'company'"
+              (click)="startVoice('company')" title="Voice input">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2">
+                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                <line x1="12" y1="19" x2="12" y2="23"></line>
+                <line x1="8" y1="23" x2="16" y2="23"></line>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="designation" class="form-label">Designation</label>
+          <div class="input-with-voice">
+            <input type="text" id="designation" name="designation" class="form-input" [(ngModel)]="form.designation"
+              placeholder="Your position" />
+            <button type="button" class="btn-voice" [class.active]="activeVoiceField === 'designation'"
+              (click)="startVoice('designation')" title="Voice input">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2">
+                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                <line x1="12" y1="19" x2="12" y2="23"></line>
+                <line x1="8" y1="23" x2="16" y2="23"></line>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="city" class="form-label">City <span class="required">*</span></label>
+          <div class="input-with-voice">
+            <input type="text" id="city" name="city" class="form-input" [(ngModel)]="form.city" placeholder="Your city"
+              required />
+            <button type="button" class="btn-voice" [class.active]="activeVoiceField === 'city'"
+              (click)="startVoice('city')" title="Voice input">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2">
+                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                <line x1="12" y1="19" x2="12" y2="23"></line>
+                <line x1="8" y1="23" x2="16" y2="23"></line>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="state" class="form-label">State</label>
+          <div class="input-with-voice">
+            <input type="text" id="state" name="state" class="form-input" [(ngModel)]="form.state"
+              placeholder="Your state" />
+            <button type="button" class="btn-voice" [class.active]="activeVoiceField === 'state'"
+              (click)="startVoice('state')" title="Voice input">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2">
+                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                <line x1="12" y1="19" x2="12" y2="23"></line>
+                <line x1="8" y1="23" x2="16" y2="23"></line>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Your Best Interest In Section -->
+        <div class="form-group full-width interests-section">
+          <label class="form-label">Your Best Interest In? <span class="required">*</span></label>
+          <div class="interests-grid">
+            @for (interest of interestOptions; track interest) {
+            <label class="interest-checkbox">
+              <input type="checkbox" [checked]="selectedInterests.includes(interest)"
+                (change)="onInterestChange(interest, $event)" />
+              <span class="checkbox-custom"></span>
+              <span class="checkbox-label">{{ interest }}</span>
+            </label>
+            }
+            <label class="interest-checkbox">
+              <input type="checkbox" [checked]="otherInterestSelected" (change)="onOtherInterestToggle($event)" />
+              <span class="checkbox-custom"></span>
+              <span class="checkbox-label">Other:</span>
+              <input type="text" class="other-input" [(ngModel)]="otherInterestText" name="otherInterest"
+                placeholder="Please specify..." [disabled]="!otherInterestSelected" />
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group full-width">
+          <label for="purpose" class="form-label">Purpose of Visit</label>
+          <div class="input-with-voice">
+            <textarea id="purpose" name="purpose" class="form-textarea" [(ngModel)]="form.purposeOfVisit"
+              placeholder="Tell us about your interest..." rows="3"></textarea>
+            <button type="button" class="btn-voice btn-voice-textarea"
+              [class.active]="activeVoiceField === 'purposeOfVisit'" (click)="startVoice('purposeOfVisit')"
+              title="Voice input">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2">
+                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                <line x1="12" y1="19" x2="12" y2="23"></line>
+                <line x1="8" y1="23" x2="16" y2="23"></line>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+
+
+      <!-- Supporting Documents Section -->
+      <div class="documents-section">
+        <div class="documents-header">
+          <div class="documents-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+            </svg>
+          </div>
+          <span class="documents-title">Supporting Documents</span>
+          <label class="btn-add-document">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            Add Document
+            <input type="file" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" (change)="onDocumentSelect($event)"
+              hidden />
+          </label>
+        </div>
+
+        @if (documents.length > 0) {
+        <div class="documents-list">
+          @for (doc of documents; track doc.name; let i = $index) {
+          <div class="document-item">
+            <div class="document-preview">
+              @if (isImageFile(doc.name)) {
+              <img [src]="doc.preview" [alt]="doc.name" />
+              } @else {
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+              </svg>
+              }
+            </div>
+            <span class="document-name">{{ doc.name }}</span>
+            <button type="button" class="document-remove" (click)="removeDocument(i)">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </div>
+          }
+        </div>
+        }
+      </div>
+
+      <!-- Submit Button -->
+      <div class="form-actions">
+        <button type="submit" class="btn-submit" [disabled]="isSubmitting">
+          @if (isSubmitting) {
+          <span>Registering...</span>
+          } @else {
+          <span>Register Visitor</span>
+          }
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Thank You Popup -->
+@if (showThankYou) {
+<div class="thankyou-overlay" (click)="closeThankYou()">
+  <div class="thankyou-modal" (click)="$event.stopPropagation()">
+    <div class="thankyou-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+      </svg>
+    </div>
+    <h2 class="thankyou-title">Thank You!</h2>
+    <p class="thankyou-message">
+      {{ registeredVisitorName }} has been registered successfully.
+    </p>
+    <p class="thankyou-sub">We look forward to seeing you at the event!</p>
+    <button class="btn-thankyou-close" (click)="closeThankYou()">
+      Continue
+    </button>
+  </div>
+</div>
+}

@@ -1,0 +1,302 @@
+<div class="visitor-report-container">
+  <div class="header">
+    <h1 class="title">Visitor Report</h1>
+    <p class="subtitle">View all registered visitors and their details</p>
+  </div>
+
+  <!-- Filter Bar -->
+  <div class="filter-bar">
+    <div class="filter-group">
+      <label class="filter-label" for="expoFilter">Filter by Expo</label>
+      <select id="expoFilter" class="filter-select" [(ngModel)]="selectedExpoId" (ngModelChange)="onExpoFilterChange()">
+        <option [ngValue]="null">All Expos</option>
+        @for (expo of expos; track expo.RID) {
+        <option [ngValue]="expo.RID">{{ expo.ExpoName }}</option>
+        }
+      </select>
+    </div>
+    <div class="filter-actions">
+      <button class="btn-download" (click)="downloadExcel()" [disabled]="visitors.length === 0">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="7 10 12 15 17 10"></polyline>
+          <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+        Download Excel
+      </button>
+      <span class="filter-count">{{ visitors.length }} of {{ allVisitors.length }} visitor(s)</span>
+    </div>
+  </div>
+
+  <!-- Success Message -->
+  @if (successMessage) {
+  <div class="alert alert-success">{{ successMessage }}</div>
+  }
+
+  <div class="content-card">
+    <!-- Loading State -->
+    @if (isLoading) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Loading visitors...</p>
+    </div>
+    }
+
+    <!-- Error State -->
+    @if (errorMessage && !isLoading) {
+    <div class="error-state">
+      <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="8" x2="12" y2="12"></line>
+        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+      </svg>
+      <p>{{ errorMessage }}</p>
+      <button class="btn-retry" (click)="loadVisitors()">Try Again</button>
+    </div>
+    }
+
+    <!-- Empty State -->
+    @if (!isLoading && !errorMessage && visitors.length === 0) {
+    <div class="empty-state">
+      <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="1.5">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+        <circle cx="9" cy="7" r="4"></circle>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+      </svg>
+      <h3>No Visitors Found</h3>
+      <p>Register visitors to see them here</p>
+    </div>
+    }
+
+    <!-- Data Table -->
+    @if (!isLoading && !errorMessage && visitors.length > 0) {
+    <div class="table-container">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th class="col-photo">Photo</th>
+            <th>Name</th>
+            <th>Expo</th>
+            <th>Contact</th>
+            <th>Company</th>
+            <th>City</th>
+            <th>Status</th>
+            <th>Registered</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (visitor of visitors; track visitor.RID) {
+          <tr>
+            <td class="cell-photo">
+              <div class="visitor-avatar">
+                @if (visitor.ImagePath) {
+                <img [src]="getImageUrl(visitor.ImagePath)" [alt]="visitor.FullName" />
+                } @else {
+                <span class="avatar-initials">{{ getInitials(visitor.FullName) }}</span>
+                }
+              </div>
+            </td>
+            <td>
+              <div class="cell-name">
+                <span class="name">{{ visitor.FullName }}</span>
+                <span class="designation">{{ visitor.Designation || '-' }}</span>
+              </div>
+            </td>
+            <td class="cell-expo">{{ getExpoName(visitor.ExpoID) }}</td>
+            <td>
+              <div class="cell-contact">
+                <span class="email">{{ visitor.EmailAddress }}</span>
+                <span class="phone">{{ visitor.PhoneNumber }}</span>
+              </div>
+            </td>
+            <td class="cell-company">{{ visitor.CompanyName }}</td>
+            <td class="cell-city">{{ visitor.City }}</td>
+            <td>
+              <span class="status-badge" [ngClass]="getStatusClass(visitor.IsActive)">
+                {{ getStatusText(visitor.IsActive) }}
+              </span>
+            </td>
+            <td class="cell-date">{{ formatDate(visitor.CreatedDate) }}</td>
+            <td class="cell-actions">
+              <button class="btn-action btn-view" (click)="viewVisitor(visitor)" title="View Details">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+                View
+              </button>
+              <label class="btn-add-doc" [class.uploading]="uploadingVisitorId === visitor.RID">
+                @if (uploadingVisitorId === visitor.RID) {
+                <span class="btn-spinner"></span>
+                } @else {
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="17 8 12 3 7 8"></polyline>
+                  <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+                }
+                <span>Add Doc</span>
+                <input type="file" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" (change)="onDocumentSelect($event, visitor)"
+                  hidden [disabled]="uploadingVisitorId === visitor.RID" />
+              </label>
+              <button class="btn-action btn-delete" (click)="confirmDelete(visitor)" title="Delete">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2">
+                  <polyline points="3 6 5 6 21 6"></polyline>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
+                Delete
+              </button>
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="table-footer">
+      <p class="record-count">Showing {{ visitors.length }} of {{ allVisitors.length }} visitor(s)</p>
+    </div>
+    }
+  </div>
+</div>
+
+<!-- View Visitor Modal -->
+@if (showModal && selectedVisitor) {
+<div class="modal-overlay" (click)="closeModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Visitor Details</h2>
+      <button class="modal-close" (click)="closeModal()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <div class="modal-visitor-header">
+        <div class="visitor-avatar modal-avatar">
+          @if (selectedVisitor.ImagePath) {
+          <img [src]="getImageUrl(selectedVisitor.ImagePath)" [alt]="selectedVisitor.FullName" />
+          } @else {
+          <span class="avatar-initials">{{ getInitials(selectedVisitor.FullName) }}</span>
+          }
+        </div>
+        <div class="modal-visitor-info">
+          <h3>{{ selectedVisitor.FullName }}</h3>
+          <p>{{ selectedVisitor.Designation || 'No designation' }}</p>
+        </div>
+        <span class="status-badge" [ngClass]="getStatusClass(selectedVisitor.IsActive)">
+          {{ getStatusText(selectedVisitor.IsActive) }}
+        </span>
+      </div>
+
+      <div class="modal-details-grid">
+        <div class="detail-item">
+          <span class="detail-label">Email</span>
+          <span class="detail-value">{{ selectedVisitor.EmailAddress }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Phone</span>
+          <span class="detail-value">{{ selectedVisitor.PhoneNumber }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Company</span>
+          <span class="detail-value">{{ selectedVisitor.CompanyName }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">City</span>
+          <span class="detail-value">{{ selectedVisitor.City }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Area of Interest</span>
+          <span class="detail-value">{{ selectedVisitor.AreaOfInterest || '-' }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Purpose of Visit</span>
+          <span class="detail-value">{{ selectedVisitor.PurposeOfVisit || '-' }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Registered</span>
+          <span class="detail-value">{{ formatDate(selectedVisitor.CreatedDate) }}</span>
+        </div>
+      </div>
+
+      <!-- Documents Section -->
+      <div class="modal-documents">
+        <h4>Documents</h4>
+        @if (isLoadingDocuments) {
+        <div class="docs-loading">
+          <div class="spinner"></div>
+          <span>Loading documents...</span>
+        </div>
+        } @else if (visitorDocuments.length === 0) {
+        <p class="no-docs">No documents uploaded.</p>
+        } @else {
+        <div class="docs-list">
+          @for (doc of visitorDocuments; track doc.RID) {
+          <div class="doc-item">
+            <div class="doc-icon">
+              @if (isImageDocument(doc.DocumentName)) {
+              <img [src]="getDocumentUrl(doc.DocumentPath)" [alt]="doc.DocumentName" class="doc-thumb" />
+              } @else {
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+              </svg>
+              }
+            </div>
+            <div class="doc-info">
+              <span class="doc-name">{{ doc.DocumentName }}</span>
+              <span class="doc-type">{{ doc.DocumentType }}</span>
+            </div>
+            <a [href]="getDocumentUrl(doc.DocumentPath)" target="_blank" class="btn-doc-view">Open</a>
+          </div>
+          }
+        </div>
+        }
+      </div>
+    </div>
+  </div>
+</div>
+}
+
+<!-- Delete Confirmation Modal -->
+@if (showDeleteConfirm && deletingVisitor) {
+<div class="modal-overlay" (click)="cancelDelete()">
+  <div class="delete-modal" (click)="$event.stopPropagation()">
+    <div class="delete-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="15" y1="9" x2="9" y2="15"></line>
+        <line x1="9" y1="9" x2="15" y2="15"></line>
+      </svg>
+    </div>
+    <h3>Delete Visitor</h3>
+    <p>Are you sure you want to delete <strong>{{ deletingVisitor.FullName }}</strong>? This action cannot be undone.
+    </p>
+    <div class="delete-actions">
+      <button class="btn-cancel" (click)="cancelDelete()" [disabled]="isDeleting">Cancel</button>
+      <button class="btn-confirm-delete" (click)="deleteVisitor()" [disabled]="isDeleting">
+        @if (isDeleting) {
+        <span class="btn-spinner"></span> Deleting...
+        } @else {
+        Delete
+        }
+      </button>
+    </div>
+  </div>
+</div>
+}

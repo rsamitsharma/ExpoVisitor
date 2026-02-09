@@ -1,0 +1,158 @@
+<div class="expo-master-container">
+  <div class="header">
+    <h1 class="title">Expo Master Setup</h1>
+    <p class="subtitle">
+      Configure your exhibition details and booth information
+    </p>
+  </div>
+
+  <form (ngSubmit)="onSubmit()" class="form-container">
+    <!-- Success/Error Messages -->
+    @if (successMessage) {
+      <div class="alert alert-success">{{ successMessage }}</div>
+    }
+    @if (errorMessage) {
+      <div class="alert alert-error">{{ errorMessage }}</div>
+    }
+
+    <div class="cards-wrapper">
+      <!-- Basic Information Card -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon basic-info-icon">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path
+                d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+              ></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+          </div>
+          <div class="card-title-group">
+            <h2 class="card-title">Basic Information</h2>
+            <p class="card-subtitle">Expo name and description</p>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <div class="form-group">
+            <label for="expoName" class="form-label">
+              Expo Name <span class="required">*</span>
+            </label>
+            <input
+              type="text"
+              id="expoName"
+              name="expoName"
+              class="form-input"
+              [(ngModel)]="form.expoName"
+              placeholder="e.g., Municipalika Expo 2025"
+              required
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- Date & Time Card -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon date-time-icon">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+          </div>
+          <div class="card-title-group">
+            <h2 class="card-title">Date & Time</h2>
+            <p class="card-subtitle">Event schedule</p>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <div class="form-group">
+            <label for="startDate" class="form-label">
+              Start Date <span class="required">*</span>
+            </label>
+            <input
+              type="date"
+              id="startDate"
+              name="startDate"
+              class="form-input"
+              [(ngModel)]="form.startDate"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="endDate" class="form-label">
+              End Date <span class="required">*</span>
+            </label>
+            <input
+              type="date"
+              id="endDate"
+              name="endDate"
+              class="form-input"
+              [(ngModel)]="form.endDate"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="openingTime" class="form-label">Opening Time</label>
+            <input
+              type="time"
+              id="openingTime"
+              name="openingTime"
+              class="form-input"
+              [(ngModel)]="form.openingTime"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="closingTime" class="form-label">Closing Time</label>
+            <input
+              type="time"
+              id="closingTime"
+              name="closingTime"
+              class="form-input"
+              [(ngModel)]="form.closingTime"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn-submit" [disabled]="isSubmitting">
+        @if (isSubmitting) {
+          <span>Creating...</span>
+        } @else {
+          <span>Create Expo</span>
+        }
+      </button>
+    </div>
+  </form>
+</div>
