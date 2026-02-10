@@ -52,36 +52,61 @@ export class MailService {
 
     private generateConfirmationEmailHtml(visitorName: string, expoName?: string): string {
         return `
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <style>
-                body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-                .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-                .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0; }
-                .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 8px 8px; }
-                .footer { text-align: center; margin-top: 20px; color: #888; font-size: 12px; }
-                .highlight { color: #667eea; font-weight: bold; }
-            </style>
-        </head>
-        <body>
-            <div class="container">
-                <div class="header">
-                    <h1>Registration Confirmed!</h1>
-                </div>
-                <div class="content">
-                    <p>Dear <span class="highlight">${visitorName}</span>,</p>
-                    <p>Thank you for registering${expoName ? ` for <strong>${expoName}</strong>` : ''}!</p>
-                    <p>Your registration has been successfully completed. We look forward to seeing you at the event.</p>
-                    <p>If you have any questions, please don't hesitate to contact us.</p>
-                    <p>Best regards,<br>The ExpoVisitor Team</p>
-                </div>
-                <div class="footer">
-                    <p>This is an automated message. Please do not reply directly to this email.</p>
-                </div>
-            </div>
-        </body>
-        </html>
+       <!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0; }
+        .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 8px 8px; }
+        .footer { text-align: center; margin-top: 20px; color: #888; font-size: 12px; }
+        .highlight { color: #667eea; font-weight: bold; }
+        .list-item { margin-bottom: 8px; }
+        a { color: #667eea; text-decoration: none; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Greetings from Responscity!</h1>
+        </div>
+        <div class="content">
+            <p>Dear <span class="highlight">${visitorName}</span>,</p>
+
+            <p>Thank you for taking the time to visit our stall at the <strong>Municipalika Expo 2026</strong> at Bharat Mandapam, New Delhi. It was a pleasure interacting with you and understanding your vision for smarter urban governance.</p>
+
+            <p>We truly appreciate your interest in our technology-driven solutions. At Responscity, we are committed to empowering local bodies with tools that ensure efficiency, safety, and transparency.</p>
+            
+            <p>As discussed, our core expertise includes:</p>
+            <ul style="list-style-type: none; padding-left: 0;">
+                <li class="list-item">🌊 Disaster Management & Early Warning Systems</li>
+                <li class="list-item">🏛️ Digital Governance & Municipal ERP</li>
+                <li class="list-item">🏙️ Smart Urban Management Solutions</li>
+            </ul>
+
+            <p>We would be delighted to continue our conversation. Whether you need a detailed demonstration, a specific case study, or a technical discussion, our team is ready to assist.</p>
+
+            <p>👉 <strong>Explore our solutions here:</strong> <a href="https://responscity.co.in/">https://responscity.com/</a></p>
+
+            <p><span class="highlight">Next Steps:</span><br>
+            If you would like to schedule a quick follow-up meeting or receive a tailored presentation, please reply to this email, and we will set it up at your convenience.</p>
+
+            <p>Thank you once again for stopping by. We look forward to the opportunity to collaborate and build smarter cities together.</p>
+
+            <br>
+            <p>Warm regards,<br>
+            <strong>Team Responscity Systems Pvt. Ltd.</strong><br>
+            🌐 <a href="https://responscity.co.in">www.responscity.com</a><br>
+            📧 <a href="mailto:info@responscity.com">info@responscity.com</a><br>
+            📞 +91 77679 87464</p>
+        </div>
+        <div class="footer">
+            <p>This is an automated message. Please do not reply directly to this email.</p>
+        </div>
+    </div>
+</body>
+</html>
         `;
     }
 

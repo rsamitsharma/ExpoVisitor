@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { VisitorMasterService, CreateVisitorMasterDto } from '../services/visitor-master.service';
 import { ExpoMasterService, ExpoMaster } from '../services/expo-master.service';
 import { MailService, SendVisitorConfirmationDto } from '../services/mail.service';
+import { WhatsappService, WhatsAppMessageDto } from '../services/whatsapp.service';
 
 interface VisitorForm {
   expoId: number | null;
@@ -81,6 +82,7 @@ export class VisitorMasterComponent implements OnInit {
     private visitorMasterService: VisitorMasterService,
     private expoMasterService: ExpoMasterService,
     private mailService: MailService,
+    private whatsappService: WhatsappService,
     private ngZone: NgZone
   ) {
     this.initSpeechRecognition();
@@ -303,6 +305,28 @@ export class VisitorMasterComponent implements OnInit {
           error: (mailError) => {
             console.error('Failed to send confirmation email:', mailError);
             // Don't show error to user - registration was successful
+          },
+        });
+
+        // Send WhatsApp message
+
+        const whatsappPayload: WhatsAppMessageDto = {
+          apiKey: '24ba9ecbfc8b45e0910088296cf47098', // TODO: Replace with your actual WhatsApp API Key
+          to: payload.PhoneNumber,
+          templateName: 'expo_visitor_msg', // TODO: Replace with your actual Template Name
+          languageCode: 'en',
+          bodyParams: [
+            { type: 'text', text: payload.FullName },
+            { type: 'text', text: this.selectedExpo?.ExpoName || 'Expo' },
+          ],
+        };
+
+        this.whatsappService.send(whatsappPayload).subscribe({
+          next: (waResponse) => {
+            console.log('WhatsApp message sent:', waResponse);
+          },
+          error: (waError) => {
+            console.error('Failed to send WhatsApp message:', waError);
           },
         });
 
